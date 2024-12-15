@@ -30,16 +30,5 @@ export default defineConfig({
         alias: {
             '@': resolve(__dirname, './src')
         }
-    },
-    build: {
-        rollupOptions: {
-            input: {
-                main: resolve(__dirname, 'index.html'),
-                furnitureHighlights: resolve(
-                    __dirname,
-                    'src/pages/furnitureHighlights'
-                )
-            }
-        }
     }
 });
