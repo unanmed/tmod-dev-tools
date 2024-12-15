@@ -6,7 +6,7 @@ import { createPages, createMpaPlugin } from 'vite-plugin-virtual-mpa';
 const pages = createPages([
     {
         name: 'index',
-        entry: '/index.html',
+        entry: '/src/pages/main/main.ts',
         filename: 'index.html',
         data: {
             title: 'tMod 开发小工具'
