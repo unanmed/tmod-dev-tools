@@ -107,16 +107,15 @@ export class HighlightGenerator {
         canvas.width = img.width;
         canvas.height = img.height;
         const split = name.split('.');
-        const post = split.at(-2);
-        const match = [...FURNITURE_NUM].find(([k]) =>
-            post?.toLowerCase().endsWith(k)
-        );
+        const post = split.at(-2)?.toLowerCase();
+        const match = [...FURNITURE_NUM].find(([k]) => post?.endsWith(k));
         let num = 1;
         if (match) {
             num = match[1];
         }
 
         const isClock = match?.[0] === 'clock';
+        const isChest = !!post?.endsWith('chest');
         let toProcess: HTMLCanvasElement | HTMLImageElement = img;
         if (isClock) {
             const canvas = document.createElement('canvas');
@@ -130,12 +129,12 @@ export class HighlightGenerator {
             toProcess = canvas;
         }
 
-        const eliminated = this.eliminateInterval(toProcess, num);
+        const eliminated = this.eliminateInterval(toProcess, num, isChest);
         const resolved: HTMLCanvasElement[] = [];
         eliminated.forEach(([canvas, ctx]) => {
             resolved.push(this.checkEdges(canvas, ctx));
         });
-        this.recoverInterval(ctx, resolved, isClock);
+        this.recoverInterval(ctx, resolved, isClock, isChest);
         URL.revokeObjectURL(url);
 
         return canvas;
@@ -143,7 +142,8 @@ export class HighlightGenerator {
 
     private eliminateInterval(
         img: HTMLImageElement | HTMLCanvasElement,
-        num: number
+        num: number,
+        isChest: boolean
     ) {
         const cellWidth = Math.ceil(img.width / 18);
         const cellHeight = Math.ceil(img.height / 18);
@@ -151,22 +151,43 @@ export class HighlightGenerator {
         const eleCellWidth = Math.round(cellWidth / num);
 
         const res: [HTMLCanvasElement, CanvasRenderingContext2D][] = [];
-        for (let i = 0; i < num; i++) {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d')!;
-            canvas.width = eleCellWidth * 8;
-            canvas.height = cellHeight * 8;
-            ctx.imageSmoothingEnabled = false;
-            for (let x = 0; x < eleCellWidth; x++) {
-                for (let y = 0; y < cellHeight; y++) {
-                    const px = i * eleCellWidth * 18 + x * 18;
-                    const py = y * 18;
-                    const dx = x * 8;
-                    const dy = y * 8;
-                    ctx.drawImage(img, px, py, 16, 16, dx, dy, 8, 8);
+        if (isChest) {
+            const width = Math.ceil(cellWidth / 2);
+            const height = Math.ceil(cellHeight / 2);
+            for (let x = 0; x < width; x++) {
+                for (let y = 0; y < height; y++) {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d')!;
+                    canvas.width = 16;
+                    canvas.height = 16;
+                    ctx.imageSmoothingEnabled = false;
+                    const px = x * 36;
+                    const py = y * 36;
+                    ctx.drawImage(img, px, py, 16, 16, 0, 0, 8, 8);
+                    ctx.drawImage(img, px + 18, py, 16, 16, 8, 0, 8, 8);
+                    ctx.drawImage(img, px, py + 18, 16, 16, 0, 8, 8, 8);
+                    ctx.drawImage(img, px + 18, py + 18, 16, 16, 8, 8, 8, 8);
+                    res.push([canvas, ctx]);
                 }
             }
-            res.push([canvas, ctx]);
+        } else {
+            for (let i = 0; i < num; i++) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d')!;
+                canvas.width = eleCellWidth * 8;
+                canvas.height = cellHeight * 8;
+                ctx.imageSmoothingEnabled = false;
+                for (let x = 0; x < eleCellWidth; x++) {
+                    for (let y = 0; y < cellHeight; y++) {
+                        const px = i * eleCellWidth * 18 + x * 18;
+                        const py = y * 18;
+                        const dx = x * 8;
+                        const dy = y * 8;
+                        ctx.drawImage(img, px, py, 16, 16, dx, dy, 8, 8);
+                    }
+                }
+                res.push([canvas, ctx]);
+            }
         }
 
         return res;
@@ -175,7 +196,8 @@ export class HighlightGenerator {
     private recoverInterval(
         ctx: CanvasRenderingContext2D,
         canvases: HTMLCanvasElement[],
-        isClock: boolean
+        isClock: boolean,
+        isChest: boolean
     ) {
         const eleCellWidth = Math.round(canvases[0].width / 8);
         const cellHeight = Math.round(canvases[0].height / 8);
@@ -190,6 +212,21 @@ export class HighlightGenerator {
                     const dx = x * 18;
                     const dy = y * 18 - 4;
                     ctx.drawImage(canvases[0], sx, sy, 8, 8, dx, dy, 16, 16);
+                }
+            }
+        } else if (isChest) {
+            const cellWidth = Math.ceil(ctx.canvas.width / 18 / 2);
+            const cellHeight = Math.ceil(ctx.canvas.height / 18 / 2);
+            for (let x = 0; x < cellWidth; x++) {
+                for (let y = 0; y < cellHeight; y++) {
+                    const index = y + x * cellHeight;
+                    const dx = x * 36;
+                    const dy = y * 36;
+                    const img = canvases[index];
+                    ctx.drawImage(img, 0, 0, 8, 8, dx, dy, 16, 16);
+                    ctx.drawImage(img, 8, 0, 8, 8, dx + 18, dy, 16, 16);
+                    ctx.drawImage(img, 0, 8, 8, 8, dx, dy + 18, 16, 16);
+                    ctx.drawImage(img, 8, 8, 8, 8, dx + 18, dy + 18, 16, 16);
                 }
             }
         } else {
