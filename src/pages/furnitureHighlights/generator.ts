@@ -114,27 +114,13 @@ export class HighlightGenerator {
             num = match[1];
         }
 
-        const isClock = match?.[0] === 'clock';
         const isChest = !!post?.endsWith('chest');
-        let toProcess: HTMLCanvasElement | HTMLImageElement = img;
-        if (isClock) {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d')!;
-            canvas.width = 34;
-            canvas.height = 84 + 4;
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(img, 0, 0, 34, 12, 0, 4, 34, 12);
-            ctx.drawImage(img, 0, 14, 34, 70, 0, 18, 34, 70);
-
-            toProcess = canvas;
-        }
-
-        const eliminated = this.eliminateInterval(toProcess, num, isChest);
+        const eliminated = this.eliminateInterval(img, num, isChest);
         const resolved: HTMLCanvasElement[] = [];
         eliminated.forEach(([canvas, ctx]) => {
             resolved.push(this.checkEdges(canvas, ctx));
         });
-        this.recoverInterval(ctx, resolved, isClock, isChest);
+        this.recoverInterval(ctx, resolved, isChest);
         URL.revokeObjectURL(url);
 
         return canvas;
@@ -158,15 +144,15 @@ export class HighlightGenerator {
                 for (let y = 0; y < height; y++) {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d')!;
-                    canvas.width = 16;
-                    canvas.height = 16;
+                    canvas.width = 17;
+                    canvas.height = 17;
                     ctx.imageSmoothingEnabled = false;
                     const px = x * 36;
-                    const py = y * 36;
+                    const py = y * 38;
                     ctx.drawImage(img, px, py, 16, 16, 0, 0, 8, 8);
                     ctx.drawImage(img, px + 18, py, 16, 16, 8, 0, 8, 8);
-                    ctx.drawImage(img, px, py + 18, 16, 16, 0, 8, 8, 8);
-                    ctx.drawImage(img, px + 18, py + 18, 16, 16, 8, 8, 8, 8);
+                    ctx.drawImage(img, px, py + 18, 16, 18, 0, 8, 8, 9);
+                    ctx.drawImage(img, px + 18, py + 18, 16, 18, 8, 8, 8, 9);
                     res.push([canvas, ctx]);
                 }
             }
@@ -196,25 +182,12 @@ export class HighlightGenerator {
     private recoverInterval(
         ctx: CanvasRenderingContext2D,
         canvases: HTMLCanvasElement[],
-        isClock: boolean,
         isChest: boolean
     ) {
         const eleCellWidth = Math.round(canvases[0].width / 8);
         const cellHeight = Math.round(canvases[0].height / 8);
         ctx.imageSmoothingEnabled = false;
-        if (isClock) {
-            ctx.drawImage(canvases[0], 0, 2, 8, 6, 0, 0, 16, 12);
-            ctx.drawImage(canvases[0], 8, 2, 8, 6, 18, 0, 16, 12);
-            for (let x = 0; x < eleCellWidth; x++) {
-                for (let y = 1; y < cellHeight; y++) {
-                    const sx = x * 8;
-                    const sy = y * 8;
-                    const dx = x * 18;
-                    const dy = y * 18 - 4;
-                    ctx.drawImage(canvases[0], sx, sy, 8, 8, dx, dy, 16, 16);
-                }
-            }
-        } else if (isChest) {
+        if (isChest) {
             const cellWidth = Math.ceil(ctx.canvas.width / 18 / 2);
             const cellHeight = Math.ceil(ctx.canvas.height / 18 / 2);
             for (let x = 0; x < cellWidth; x++) {
@@ -225,8 +198,8 @@ export class HighlightGenerator {
                     const img = canvases[index];
                     ctx.drawImage(img, 0, 0, 8, 8, dx, dy, 16, 16);
                     ctx.drawImage(img, 8, 0, 8, 8, dx + 18, dy, 16, 16);
-                    ctx.drawImage(img, 0, 8, 8, 8, dx, dy + 18, 16, 16);
-                    ctx.drawImage(img, 8, 8, 8, 8, dx + 18, dy + 18, 16, 16);
+                    ctx.drawImage(img, 0, 8, 8, 9, dx, dy + 18, 16, 18);
+                    ctx.drawImage(img, 8, 8, 8, 9, dx + 18, dy + 18, 16, 18);
                 }
             }
         } else {
