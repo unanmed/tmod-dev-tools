@@ -194,7 +194,7 @@ export class HighlightGenerator {
                 for (let y = 0; y < cellHeight; y++) {
                     const index = y + x * cellHeight;
                     const dx = x * 36;
-                    const dy = y * 36;
+                    const dy = y * 38;
                     const img = canvases[index];
                     ctx.drawImage(img, 0, 0, 8, 8, dx, dy, 16, 16);
                     ctx.drawImage(img, 8, 0, 8, 8, dx + 18, dy, 16, 16);
