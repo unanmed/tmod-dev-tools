@@ -128,6 +128,7 @@ folder.on('update', () => {
     height: calc(100% - 32px);
     padding: 16px;
     overflow: auto;
+    user-select: none;
 }
 
 .not-support {

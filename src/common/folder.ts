@@ -43,3 +43,25 @@ export class FolderHandler extends EventEmitter<FolderHandlerEvent> {
         return success;
     }
 }
+
+interface SingleFolderHandlerEvent {
+    update: [];
+}
+
+export class SingleFolderHandler extends EventEmitter<SingleFolderHandlerEvent> {
+    folder?: FileSystemDirectoryHandle;
+
+    async choose() {
+        const handle = await window.showDirectoryPicker({
+            mode: 'readwrite',
+            startIn: 'documents'
+        });
+        const permission = await handle.queryPermission({ mode: 'readwrite' });
+        if (permission !== 'granted') {
+            await handle.requestPermission({ mode: 'readwrite' });
+        }
+        this.folder = handle;
+        this.emit('update');
+        return handle;
+    }
+}

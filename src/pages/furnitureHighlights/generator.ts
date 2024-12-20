@@ -61,6 +61,7 @@ export class HighlightGenerator {
     }
 
     async generate() {
+        if (this.processing) return;
         this.processing = true;
         message.info('处理中，请稍后...');
         await Promise.all(

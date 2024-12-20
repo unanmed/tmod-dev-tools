@@ -17,7 +17,8 @@
 
 <script lang="ts" setup>
 const tools = [
-    ['家具贴图描边', `${import.meta.env.BASE_URL}furnitureHighlights`]
+    ['家具贴图描边', `${import.meta.env.BASE_URL}furnitureHighlights`],
+    ['家具代码生成', `${import.meta.env.BASE_URL}furnitureGenerator`]
 ] satisfies [string, string][];
 
 function open(url: string) {
@@ -27,6 +28,7 @@ function open(url: string) {
 
 <style lang="less" scoped>
 .main-div {
+    background-color: #eee;
     width: 100%;
     height: 100%;
     display: flex;
@@ -47,13 +49,14 @@ function open(url: string) {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #e9e9e9;
+    background-color: #ddd;
     cursor: pointer;
     transition: all 0.3s ease;
+    margin-bottom: 8px;
 }
 
 .tool-one:hover {
-    background-color: #d6d6d6;
+    background-color: #ccc;
 }
 
 .tool-list {
