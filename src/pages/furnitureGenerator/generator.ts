@@ -397,8 +397,9 @@ export class FurnitureGenerator {
             ? Math.floor(cellHeight / size)
             : Math.ceil(cellHeight / size);
 
+        const factor18 = content.has18 || content.type === 'chest' ? 1 : 0;
         const tw = wc * (size + 1) * cellCountX;
-        const th = hc * (size + 1) * cellCountY;
+        const th = hc * (size + 1) * cellCountY + factor18 * hc;
         splitted.width = tw;
         splitted.height = th;
 
@@ -409,7 +410,8 @@ export class FurnitureGenerator {
                 const baseX = cellWidth * x + x;
                 const baseY = texture.height - cellHeight * (y + 1) - y;
                 const baseDrawX = cellCountX * x * (size + 1);
-                const baseDrawY = th - cellCountY * (y + 1) * (size + 1);
+                const baseDrawY =
+                    th - cellCountY * (y + 1) * (size + 1) - factor18 * (y + 1);
 
                 // 对每帧进行分割
                 for (let nx = 0; nx < cellCountX; nx++) {
@@ -419,7 +421,10 @@ export class FurnitureGenerator {
                         const dx = baseDrawX + nx * size + nx;
                         const dy = baseDrawY + ny * size + ny;
 
-                        if (content.has18 && ny === cellCountY - 1) {
+                        if (
+                            (content.has18 || content.type === 'chest') &&
+                            ny === cellCountY - 1
+                        ) {
                             ctx.drawImage(texture, cx, cy, 8, 9, dx, dy, 8, 9);
                         } else {
                             ctx.drawImage(texture, cx, cy, 8, 8, dx, dy, 8, 8);
@@ -532,9 +537,10 @@ export class FurnitureGenerator {
         const cellCountY = content.has18
             ? Math.floor(ch / 8)
             : Math.ceil(ch / 8);
-        const coord = content.has18
-            ? [...Array(cellCountY - 1).fill(16), 18]
-            : Array(cellCountY).fill(16);
+        const coord =
+            content.has18 || content.type === 'chest'
+                ? [...Array(cellCountY - 1).fill(16), 18]
+                : Array(cellCountY).fill(16);
         const name = this.getFileName(content);
         const code = tileTemplate[type === 'Door' ? 'DoorOpen' : type](
             name,
