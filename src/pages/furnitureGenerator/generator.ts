@@ -450,9 +450,15 @@ export class FurnitureGenerator {
         return img;
     }
 
-    getFileName(content: GenerateItem, name: string = this.name) {
-        const type = STANDARDIZED_TYPE.get(content.type);
-        if (!type) return '';
+    getFileName(
+        content: GenerateItem,
+        name: string = this.name,
+        handle: FileSystemFileHandle = content.tile
+    ) {
+        const typeLength = content.type.length;
+        const [start] = handle.name.replace(/\.\w+$/, '').split('_');
+        if (!start.toLowerCase().endsWith(content.type)) return '';
+        const type = start.slice(-typeLength);
         let str = '';
         str += name;
         str += type;
@@ -554,10 +560,15 @@ export class FurnitureGenerator {
         );
 
         if (flame) {
+            const flameName = this.getFileName(
+                content,
+                this.name,
+                content.flame!
+            );
             const flameImg = await this.handleFlame(flame, content);
-            const flameName = name + `_Flame.png`;
+            const flameFileName = flameName + `_Flame.png`;
             const tex = await canvasToBlob(flameImg);
-            await this.write(this.tile.folder, flameName, tex);
+            await this.write(this.tile.folder, flameFileName, tex);
         }
 
         const codeName = name + `.cs`;
@@ -623,7 +634,7 @@ export class FurnitureGenerator {
         const type = STANDARDIZED_TYPE.get(content.type);
         if (!type) return;
 
-        const name = this.getFileName(content);
+        const name = this.getFileName(content, this.name, content.item);
         const code = itemTemplate(
             name,
             this.itemNamespace,
