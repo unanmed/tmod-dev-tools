@@ -1244,7 +1244,6 @@ public class ${e} : ModTile
 		Main.tileNoAttach[Type] = true;
 		Main.tileLavaDeath[Type] = true;
 		TileID.Sets.HasOutlines[Type] = true;
-		TileID.Sets.CanBeSleptIn[Type] = true; // Facilitates calling ModifySleepingTargetInfo
 		TileID.Sets.InteractibleByNPCs[Type] = true; // Town NPCs will palm their hand at this tile
 		TileID.Sets.IsValidSpawnPoint[Type] = true;
 
